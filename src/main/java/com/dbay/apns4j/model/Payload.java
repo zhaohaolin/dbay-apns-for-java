@@ -1,17 +1,17 @@
 /*
  * Copyright 2013 DiscoveryBay Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.dbay.apns4j.model;
 
@@ -23,30 +23,34 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
- * @author RamosLi
- * For more details, view the following site:
- *   https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html
+ * @author RamosLi For more details, view the following site:
+ *         https://developer.apple
+ *         .com/library/ios/documentation/NetworkingInternet
+ *         /Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html
  */
 public class Payload {
-	private static final String APS = "aps";
-	private Map<String, Object> params;
-	private String alert;
-	private Integer badge;
-	private String sound = "default.caf";
-	private Integer contentAvailable;
 	
-	private String alertBody;
-	private String alertActionLocKey;
-	private String alertLocKey;
-	private String[] alertLocArgs;
-	private String alertLaunchImage;
+	private static final String	APS		= "aps";
+	private Map<String, Object>	params;
+	private String				alert;
+	private Integer				badge;
+	private String				sound	= "default.caf";
+	private Integer				contentAvailable;
+	
+	private String				alertBody;
+	private String				alertActionLocKey;
+	private String				alertLocKey;
+	private String[]			alertLocArgs;
+	private String				alertLaunchImage;
 	
 	public Map<String, Object> getParams() {
 		return params;
 	}
+	
 	public void setParams(Map<String, Object> params) {
 		this.params = params;
 	}
+	
 	public void addParam(String key, Object obj) {
 		if (params == null) {
 			params = new HashMap<String, Object>();
@@ -60,18 +64,23 @@ public class Payload {
 	public String getAlert() {
 		return alert;
 	}
+	
 	public void setAlert(String alert) {
 		this.alert = alert;
 	}
+	
 	public Integer getBadge() {
 		return badge;
 	}
+	
 	public void setBadge(Integer badge) {
 		this.badge = badge;
 	}
+	
 	public String getSound() {
 		return sound;
 	}
+	
 	public void setSound(String sound) {
 		this.sound = sound;
 	}
@@ -118,12 +127,14 @@ public class Payload {
 		}
 		return object.toString();
 	}
+	
 	@SuppressWarnings("unchecked")
 	private void putIntoJson(String key, String value, JSONObject obj) {
 		if (value != null) {
 			obj.put(key, value);
 		}
 	}
+	
 	public static void main(String[] args) {
 		Payload payload = new Payload();
 		payload.setAlert("How are you?");
@@ -133,39 +144,51 @@ public class Payload {
 		payload.addParam("number", 12312312312L);
 		System.out.println(payload.toString());
 	}
+	
 	public String getAlertBody() {
 		return alertBody;
 	}
+	
 	public void setAlertBody(String alertBody) {
 		this.alertBody = alertBody;
 	}
+	
 	public String getAlertActionLocKey() {
 		return alertActionLocKey;
 	}
+	
 	public void setAlertActionLocKey(String alertActionLocKey) {
 		this.alertActionLocKey = alertActionLocKey;
 	}
+	
 	public String getAlertLocKey() {
 		return alertLocKey;
 	}
+	
 	public void setAlertLocKey(String alertLocKey) {
 		this.alertLocKey = alertLocKey;
 	}
+	
 	public String getAlertLaunchImage() {
 		return alertLaunchImage;
 	}
+	
 	public void setAlertLaunchImage(String alertLaunchImage) {
 		this.alertLaunchImage = alertLaunchImage;
 	}
+	
 	public String[] getAlertLocArgs() {
 		return alertLocArgs;
 	}
+	
 	public void setAlertLocArgs(String[] alertLocArgs) {
 		this.alertLocArgs = alertLocArgs;
 	}
+	
 	public Integer getContentAvailable() {
 		return contentAvailable;
 	}
+	
 	public void setContentAvailable(Integer contentAvailable) {
 		this.contentAvailable = contentAvailable;
 	}

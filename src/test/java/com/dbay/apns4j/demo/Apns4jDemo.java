@@ -11,21 +11,25 @@ import com.dbay.apns4j.model.Payload;
 
 /**
  * @author RamosLi
- *
+ * 
  */
 public class Apns4jDemo {
-	private static IApnsService apnsService;
+	private static IApnsService	apnsService;
 	
 	private static IApnsService getApnsService() {
 		if (apnsService == null) {
 			ApnsConfig config = new ApnsConfig();
-			InputStream is = Apns4jDemo.class.getClassLoader().getResourceAsStream("Certificate.p12");
+			
+			// 这里可以直接放byte流初始化
+			InputStream is = Apns4jDemo.class.getClassLoader()
+					.getResourceAsStream("push_production.p12");
+			
 			config.setKeyStore(is);
 			config.setDevEnv(false);
-			config.setPassword("123123");
+			config.setPassword("XXXXXX");
 			config.setPoolSize(3);
 			// 假如需要在同个java进程里给不同APP发送通知，那就需要设置为不同的name
-//			config.setName("welove1");
+			// config.setName("welove1");
 			apnsService = ApnsServiceImpl.createInstance(config);
 		}
 		return apnsService;
@@ -35,43 +39,49 @@ public class Apns4jDemo {
 		IApnsService service = getApnsService();
 		
 		// send notification
-		String token = "94c4764e4645f42a7b2052692c8b5b41f9d5c925876e11fec5721e9045ee4e5b";
+		String token = "4f2c96241ed061c5e7c58cfd20e77b361fd4f7fb9422b6d1d2efc2807aba7733";
 		
 		Payload payload = new Payload();
 		payload.setAlert("How are you?");
-		// If this property is absent, the badge is not changed. To remove the badge, set the value of this property to 0
+		// If this property is absent, the badge is not changed. To remove the
+		// badge, set the value of this property to 0
 		payload.setBadge(1);
 		// set sound null, the music won't be played
-//		payload.setSound(null);
+		// payload.setSound(null);
 		payload.setSound("msg.mp3");
 		payload.addParam("uid", 123456);
 		payload.addParam("type", 12);
+		
+		// send notification
 		service.sendNotification(token, payload);
 		
 		// payload, use loc string
 		Payload payload2 = new Payload();
 		payload2.setBadge(1);
 		payload2.setAlertLocKey("GAME_PLAY_REQUEST_FORMAT");
-		payload2.setAlertLocArgs(new String[]{"Jenna", "Frank"});
+		payload2.setAlertLocArgs(new String[] { "Jenna", "Frank" });
+		
+		// send notification
 		service.sendNotification(token, payload2);
 		
 		// get feedback
 		List<Feedback> list = service.getFeedbacks();
 		if (list != null && list.size() > 0) {
 			for (Feedback feedback : list) {
-				System.out.println(feedback.getDate() + " " + feedback.getToken());
+				System.out.println(feedback.getDate() + " "
+						+ feedback.getToken());
 			}
 		}
 		
-//		try {
-//			Thread.sleep(5000);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		// try {
+		// Thread.sleep(5000);
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
 		
 		// It's a good habit to shutdown what you never use
-//		service.shutdown();
+		// service.shutdown();
 		
-//		System.exit(0);
+		// System.exit(0);
 	}
 }
