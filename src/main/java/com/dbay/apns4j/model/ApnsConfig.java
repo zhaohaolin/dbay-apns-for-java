@@ -38,7 +38,7 @@ public class ApnsConfig {
 	/**
 	 * connection pool size.
 	 */
-	private int			poolSize		= 3;
+	private int			poolSize		= 5;
 	/**
 	 * the length of the notification cache size. It's used for resending
 	 * notifications when an error response detected
