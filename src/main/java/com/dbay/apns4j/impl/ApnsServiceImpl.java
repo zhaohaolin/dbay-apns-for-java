@@ -15,6 +15,16 @@
  */
 package com.dbay.apns4j.impl;
 
+import static com.dbay.apns4j.model.ApnsConstants.ALGORITHM;
+import static com.dbay.apns4j.model.ApnsConstants.KEYSTORE_TYPE;
+import static com.dbay.apns4j.model.ApnsConstants.PROTOCOL;
+
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +33,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.SocketFactory;
+import javax.security.cert.CertificateExpiredException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import static com.dbay.apns4j.model.ApnsConstants.*;
 
 import com.dbay.apns4j.IApnsConnection;
 import com.dbay.apns4j.IApnsFeedbackConnection;
@@ -53,7 +62,10 @@ public class ApnsServiceImpl implements IApnsService {
 	private ApnsConnectionPool		connPool		= null;
 	private IApnsFeedbackConnection	feedbackConn	= null;
 	
-	private ApnsServiceImpl(ApnsConfig config) {
+	private ApnsServiceImpl(ApnsConfig config)
+			throws UnrecoverableKeyException, KeyManagementException,
+			KeyStoreException, NoSuchAlgorithmException, CertificateException,
+			CertificateExpiredException, IOException {
 		int poolSize = config.getPoolSize();
 		service = Executors.newFixedThreadPool(poolSize);
 		
@@ -129,11 +141,14 @@ public class ApnsServiceImpl implements IApnsService {
 	private static Map<String, IApnsService>	serviceCacheMap	= new HashMap<String, IApnsService>(
 																		3);
 	
-	public static IApnsService getCachedService(String name) {
+	public final static IApnsService getCachedService(String name) {
 		return serviceCacheMap.get(name);
 	}
 	
-	public static IApnsService createInstance(ApnsConfig config) {
+	public final static IApnsService createInstance(ApnsConfig config)
+			throws UnrecoverableKeyException, KeyManagementException,
+			KeyStoreException, NoSuchAlgorithmException, CertificateException,
+			CertificateExpiredException, IOException {
 		checkConfig(config);
 		String name = config.getName();
 		IApnsService service = getCachedService(name);
