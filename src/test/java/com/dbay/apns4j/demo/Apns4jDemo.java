@@ -1,9 +1,16 @@
 package com.dbay.apns4j.demo;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.List;
+
+import javax.security.cert.CertificateExpiredException;
 
 import com.dbay.apns4j.IApnsService;
 import com.dbay.apns4j.impl.ApnsServiceImpl;
@@ -18,7 +25,10 @@ import com.dbay.apns4j.model.Payload;
 public class Apns4jDemo {
 	private static IApnsService	apnsService;
 	
-	private static IApnsService getApnsService() throws FileNotFoundException {
+	private static IApnsService getApnsService()
+			throws UnrecoverableKeyException, KeyManagementException,
+			KeyStoreException, NoSuchAlgorithmException, CertificateException,
+			CertificateExpiredException, IOException {
 		if (apnsService == null) {
 			ApnsConfig config = new ApnsConfig();
 			
@@ -40,7 +50,10 @@ public class Apns4jDemo {
 		return apnsService;
 	}
 	
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws UnrecoverableKeyException,
+			KeyManagementException, KeyStoreException,
+			NoSuchAlgorithmException, CertificateException,
+			CertificateExpiredException, IOException {
 		IApnsService service = getApnsService();
 		
 		// send notification
@@ -53,9 +66,9 @@ public class Apns4jDemo {
 		payload.setBadge(8);
 		// set sound null, the music won't be played
 		// payload.setSound(null);
-		//payload.setSound("msg.mp3");
-		//payload.addParam("uid", 123456);
-		//payload.addParam("type", 12);
+		// payload.setSound("msg.mp3");
+		// payload.addParam("uid", 123456);
+		// payload.addParam("type", 12);
 		
 		// send notification
 		service.sendNotification(token, payload);
@@ -67,7 +80,7 @@ public class Apns4jDemo {
 		payload2.setAlertLocArgs(new String[] { "Jenna", "Frank" });
 		
 		// send notification
-		//service.sendNotification(token, payload2);
+		// service.sendNotification(token, payload2);
 		
 		// get feedback
 		List<Feedback> list = service.getFeedbacks();
@@ -85,8 +98,8 @@ public class Apns4jDemo {
 		// }
 		
 		// It's a good habit to shutdown what you never use
-		 //service.shutdown();
+		// service.shutdown();
 		
-		 //System.exit(0);
+		// System.exit(0);
 	}
 }
