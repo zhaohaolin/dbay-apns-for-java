@@ -1,4 +1,4 @@
-package com.dbay.apns4j;
+package com.dbay.apns4j.tools;
 
 import java.sql.Timestamp;
 import java.text.ParseException;

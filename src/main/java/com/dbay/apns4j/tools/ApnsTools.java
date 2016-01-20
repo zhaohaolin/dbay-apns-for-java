@@ -41,7 +41,6 @@ import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dbay.apns4j.DateUtil;
 import com.dbay.apns4j.model.Command;
 import com.dbay.apns4j.model.FrameItem;
 
@@ -163,66 +162,44 @@ public abstract class ApnsTools {
 					.getCertificate(alias);
 			if (null != certificate) {
 				String type = certificate.getType();
-				if (LOG.isInfoEnabled()) {
-					LOG.info("证书类型：type=[{}]", type);
-				}
-				
 				int ver = certificate.getVersion();
-				if (LOG.isInfoEnabled()) {
-					LOG.info("证书版本号：ver=[{}]", ver);
-				}
-				
 				String name = certificate.getSubjectDN().getName();
-				if (LOG.isInfoEnabled()) {
-					LOG.info("证书标题：subjectDN=[{}]", name);
-				}
-				
 				String serialNumber = certificate.getSerialNumber()
 						.toString(16);
-				if (LOG.isInfoEnabled()) {
-					LOG.info("证书序列号：serialNumber=[{}]", serialNumber);
-				}
-				
 				String issuerDN = certificate.getIssuerDN().getName();
-				if (LOG.isInfoEnabled()) {
-					LOG.info("证书发行者：issuerDN=[{}]", issuerDN);
-				}
-				
 				String sigAlgName = certificate.getSigAlgName();
-				if (LOG.isInfoEnabled()) {
-					LOG.info("证书签名算法：sigAlgName=[{}]", sigAlgName);
-				}
-				
 				String publicAlgorithm = certificate.getPublicKey()
 						.getAlgorithm();
-				if (LOG.isInfoEnabled()) {
-					LOG.info("证书公钥算法：publicAlgorithm=[{}]", publicAlgorithm);
-				}
-				
 				Date before = certificate.getNotBefore();
-				if (LOG.isInfoEnabled()) {
-					LOG.info("证书开始日期：before=[{}]", DateFormatUtils.format(
-							before, "yyyy-MM-dd HH:mm:ss"));
-				}
-				
 				Date after = certificate.getNotAfter();
-				if (LOG.isInfoEnabled()) {
-					LOG.info("证书结束日期：after=[{}]", DateFormatUtils.format(after,
-							"yyyy-MM-dd HH:mm:ss"));
-				}
+				
+				String beforeStr = DateFormatUtils.format(before,
+						"yyyy-MM-dd HH:mm:ss");
+				String afterStr = DateFormatUtils.format(after,
+						"yyyy-MM-dd HH:mm:ss");
 				
 				// 判断证书是否
-				long day = DateUtil.getNumberOfDaysBetween(after, new Date());
-				if (day <= 0) {
-					if (LOG.isWarnEnabled()) {
-						LOG.warn("证书已经过期：[{}]天", Math.abs(day));
+				long expire = DateUtil
+						.getNumberOfDaysBetween(new Date(), after);
+				if (expire <= 0) {
+					if (LOG.isErrorEnabled()) {
+						LOG.error(
+								"证书标题：[{}], 类型：[{}], 版本号：[{}], 序列号：[{}], 发行者：[{}], 签名算法：[{}], 公钥算法：[{}], 有效期从：[{}]到[{}], 已经过期：[{}]天",
+								name, type, ver, serialNumber, issuerDN,
+								sigAlgName, publicAlgorithm, beforeStr,
+								afterStr, Math.abs(expire));
 					}
+					
 					throw new CertificateExpiredException("证书已经过期：["
-							+ Math.abs(day) + "]天");
+							+ Math.abs(expire) + "]天");
 				}
 				
 				if (LOG.isInfoEnabled()) {
-					LOG.info("证书将在[{}]天后过期", day);
+					LOG.info(
+							"证书标题：[{}], 类型：[{}], 版本号：[{}], 序列号：[{}], 发行者：[{}], 签名算法：[{}], 公钥算法：[{}], 有效期从：[{}]到[{}], 证书将在[{}]天后过期",
+							name, type, ver, serialNumber, issuerDN,
+							sigAlgName, publicAlgorithm, beforeStr, afterStr,
+							expire);
 				}
 			}
 		}
