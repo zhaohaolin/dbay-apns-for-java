@@ -124,21 +124,6 @@
 		</plugins>
 	</build>
 
-	<distributionManagement>
 
-		<!-- release -->
-		<repository>
-			<id>civil-release</id>
-			<name>civil-release</name>
-			<url>http://maven.hikvision.com.cn/nexus/content/repositories/civil-release/</url>
-		</repository>
-
-		<!-- snapshot -->
-		<snapshotRepository>
-			<id>civil-snapshot</id>
-			<name>civil-snapshot</name>
-			<url>http://maven.hikvision.com.cn/nexus/content/repositories/civil-snapshot/</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 </project>
