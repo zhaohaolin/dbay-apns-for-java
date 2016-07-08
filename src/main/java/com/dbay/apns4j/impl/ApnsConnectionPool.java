@@ -15,16 +15,20 @@
  */
 package com.dbay.apns4j.impl;
 
+import static com.dbay.apns4j.model.ApnsConstants.HOST_DEVELOPMENT_ENV;
+import static com.dbay.apns4j.model.ApnsConstants.HOST_PRODUCTION_ENV;
+import static com.dbay.apns4j.model.ApnsConstants.PORT_DEVELOPMENT_ENV;
+import static com.dbay.apns4j.model.ApnsConstants.PORT_PRODUCTION_ENV;
+
 import java.io.Closeable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.net.SocketFactory;
 
+import com.dbay.apns4j.ErrorProcessHandler;
 import com.dbay.apns4j.IApnsConnection;
 import com.dbay.apns4j.model.ApnsConfig;
-
-import static com.dbay.apns4j.model.ApnsConstants.*;
 
 /**
  * 
@@ -37,7 +41,8 @@ public class ApnsConnectionPool implements Closeable {
 	private SocketFactory					factory;
 	private BlockingQueue<IApnsConnection>	connQueue	= null;
 	
-	private ApnsConnectionPool(ApnsConfig config, SocketFactory factory) {
+	private ApnsConnectionPool(ApnsConfig config, SocketFactory factory,
+			ErrorProcessHandler errorProcessHandler) {
 		this.factory = factory;
 		
 		String host = HOST_PRODUCTION_ENV;
@@ -51,12 +56,12 @@ public class ApnsConnectionPool implements Closeable {
 		connQueue = new LinkedBlockingQueue<IApnsConnection>(poolSize);
 		
 		for (int i = 0; i < poolSize; i++) {
-			String connName = (config.isDevEnv() ? "dev-" : "pro-")
-					+ CONN_ID_SEQ++;
-			IApnsConnection conn = new ApnsConnectionImpl(this.factory, host,
-					port, config.getRetries(), config.getCacheLength(),
+			String connName = config.getName() + "-"
+					+ (config.isDevEnv() ? "dev-" : "pro-") + CONN_ID_SEQ++;
+			final IApnsConnection conn = new ApnsConnectionImpl(this.factory,
+					host, port, config.getRetries(), config.getCacheLength(),
 					config.getName(), connName, config.getIntervalTime(),
-					config.getTimeout());
+					config.getTimeout(), config.getName(), errorProcessHandler);
 			connQueue.add(conn);
 		}
 	}
@@ -94,7 +99,7 @@ public class ApnsConnectionPool implements Closeable {
 	 * @return
 	 */
 	public static ApnsConnectionPool newConnPool(ApnsConfig config,
-			SocketFactory factory) {
-		return new ApnsConnectionPool(config, factory);
+			SocketFactory factory, ErrorProcessHandler errorProcessHandler) {
+		return new ApnsConnectionPool(config, factory, errorProcessHandler);
 	}
 }

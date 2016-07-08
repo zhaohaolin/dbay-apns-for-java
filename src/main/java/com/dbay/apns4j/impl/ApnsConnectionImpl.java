@@ -35,6 +35,7 @@ import javax.net.SocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dbay.apns4j.ErrorProcessHandler;
 import com.dbay.apns4j.IApnsConnection;
 import com.dbay.apns4j.model.Command;
 import com.dbay.apns4j.model.ErrorResponse;
@@ -98,15 +99,16 @@ public class ApnsConnectionImpl implements IApnsConnection {
 	private String					connName;
 	private int						intervalTime;
 	private long					lastSuccessfulTime		= 0;
-	
 	private AtomicInteger			notificaionSentCount	= new AtomicInteger(
 																	0);
-	
 	private Object					lock					= new Object();
+	private String					serviceName				= "";
+	private ErrorProcessHandler		errorProcessHandler;
 	
 	public ApnsConnectionImpl(SocketFactory factory, String host, int port,
 			int maxRetries, int maxCacheLength, String name, String connName,
-			int intervalTime, int timeout) {
+			int intervalTime, int timeout, String serviceName,
+			ErrorProcessHandler errorProcessHandler) {
 		this.factory = factory;
 		this.host = host;
 		this.port = port;
@@ -116,6 +118,8 @@ public class ApnsConnectionImpl implements IApnsConnection {
 		this.connName = connName;
 		this.intervalTime = intervalTime;
 		this.readTimeOut = timeout;
+		this.serviceName = serviceName;
+		this.errorProcessHandler = errorProcessHandler;
 	}
 	
 	@Override
@@ -176,21 +180,24 @@ public class ApnsConnectionImpl implements IApnsConnection {
 					isSuccessful = true;
 					break;
 				} catch (Exception e) {
-					logger.error(connName + " " + e.getMessage(), e);
+					logger.error(
+							serviceName + "," + connName + " " + e.getMessage(),
+							e);
 					closeSocket(socket);
 					socket = null;
 				}
 				retries++;
 			}
 			if (!isSuccessful) {
-				logger.error(String.format("%s Notification send failed. %s",
+				logger.error(String.format(
+						"%s, %s Notification send failed. %s", serviceName,
 						connName, notification));
 				return;
 			} else {
 				logger.info(String.format(
-						"%s Send success. count: %s, notificaion: %s",
-						connName, notificaionSentCount.incrementAndGet(),
-						notification));
+						"%s, %s Send success. count: %s, notificaion: %s",
+						serviceName, connName,
+						notificaionSentCount.incrementAndGet(), notification));
 				
 				notificationCachedQueue.add(notification);
 				lastSuccessfulTime = System.currentTimeMillis();
@@ -294,11 +301,18 @@ public class ApnsConnectionImpl implements IApnsConnection {
 						int errorId = ApnsTools.parse4ByteInt(res[2], res[3],
 								res[4], res[5]);
 						
+						String token = ErrorResponse.desc(status);
+						
+						// callback error 把返回失效的token要放回到过滤列表中去
+						if (null != errorProcessHandler) {
+							errorProcessHandler.process(errorId, status, token);
+						}
+						
 						if (logger.isInfoEnabled()) {
 							logger.info(String
-									.format("%s Received error response. status: %s, id: %s, error-desc: %s",
-											connName, status, errorId,
-											ErrorResponse.desc(status)));
+									.format("%s, %s Received error response. status: %s, id: %s, error-desc: %s",
+											serviceName, connName, status,
+											errorId, token));
 						}
 						
 						Queue<PushNotification> resentQueue = new LinkedList<PushNotification>();

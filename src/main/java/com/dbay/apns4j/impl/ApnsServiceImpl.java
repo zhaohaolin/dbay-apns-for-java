@@ -29,7 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.SocketFactory;
@@ -38,6 +39,7 @@ import javax.security.cert.CertificateExpiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dbay.apns4j.ErrorProcessHandler;
 import com.dbay.apns4j.IApnsConnection;
 import com.dbay.apns4j.IApnsFeedbackConnection;
 import com.dbay.apns4j.IApnsService;
@@ -61,19 +63,27 @@ public class ApnsServiceImpl implements IApnsService {
 	private ExecutorService			service			= null;
 	private ApnsConnectionPool		connPool		= null;
 	private IApnsFeedbackConnection	feedbackConn	= null;
+	private String					name;
+	private int						queueSize		= 10240;
 	
-	private ApnsServiceImpl(ApnsConfig config)
+	private ApnsServiceImpl(ApnsConfig config,
+			ErrorProcessHandler errorProcessHandler)
 			throws UnrecoverableKeyException, KeyManagementException,
 			KeyStoreException, NoSuchAlgorithmException, CertificateException,
 			CertificateExpiredException, IOException {
+		this.name = config.getName();
 		int poolSize = config.getPoolSize();
-		service = Executors.newFixedThreadPool(poolSize);
+		// this.service = Executors.newFixedThreadPool(poolSize);
+		this.service = new ThreadPoolExecutor(poolSize, poolSize, 0L,
+				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(
+						queueSize));
 		
 		SocketFactory factory = ApnsTools.createSocketFactory(
 				config.getKeyStore(), config.getPassword(), KEYSTORE_TYPE,
 				ALGORITHM, PROTOCOL);
-		connPool = ApnsConnectionPool.newConnPool(config, factory);
-		feedbackConn = new ApnsFeedbackConnectionImpl(config, factory);
+		this.connPool = ApnsConnectionPool.newConnPool(config, factory,
+				errorProcessHandler);
+		this.feedbackConn = new ApnsFeedbackConnectionImpl(config, factory);
 	}
 	
 	@Override
@@ -138,14 +148,14 @@ public class ApnsServiceImpl implements IApnsService {
 		}
 	}
 	
-	private static Map<String, IApnsService>	serviceCacheMap	= new HashMap<String, IApnsService>(
-																		3);
+	private final static Map<String, IApnsService>	serviceCacheMap	= new HashMap<String, IApnsService>();
 	
 	public final static IApnsService getCachedService(String name) {
 		return serviceCacheMap.get(name);
 	}
 	
-	public final static IApnsService createInstance(ApnsConfig config)
+	public final static IApnsService createInstance(ApnsConfig config,
+			ErrorProcessHandler errorProcessHandler)
 			throws UnrecoverableKeyException, KeyManagementException,
 			KeyStoreException, NoSuchAlgorithmException, CertificateException,
 			CertificateExpiredException, IOException {
@@ -156,7 +166,7 @@ public class ApnsServiceImpl implements IApnsService {
 			synchronized (name.intern()) {
 				service = getCachedService(name);
 				if (service == null) {
-					service = new ApnsServiceImpl(config);
+					service = new ApnsServiceImpl(config, errorProcessHandler);
 					serviceCacheMap.put(name, service);
 				}
 			}

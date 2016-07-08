@@ -33,7 +33,7 @@ public class Apns4jDemo {
 			ApnsConfig config = new ApnsConfig();
 			
 			// 这里可以直接放byte流初始化
-			String keystore = "C:\\Users\\zhaohaolin.HIK\\git\\dbay-apns-for-java\\src\\test\\java\\com\\dbay\\apns4j\\demo\\ezviz_distribution.p12";
+			String keystore = "C:\\Users\\zhaohaolin.HIK\\git\\dbay-apns-for-java\\src\\test\\java\\com\\dbay\\apns4j\\demo\\distribution_sports.p12";
 			// InputStream is = Apns4jDemo.class.getClassLoader()
 			// .getResourceAsStream("videointercom_development.p12");
 			
@@ -45,7 +45,7 @@ public class Apns4jDemo {
 			config.setPoolSize(3);
 			// 假如需要在同个java进程里给不同APP发送通知，那就需要设置为不同的name
 			// config.setName("welove1");
-			apnsService = ApnsServiceImpl.createInstance(config);
+			apnsService = ApnsServiceImpl.createInstance(config, null);
 		}
 		return apnsService;
 	}
@@ -57,7 +57,7 @@ public class Apns4jDemo {
 		IApnsService service = getApnsService();
 		
 		// send notification
-		String token = "03f863657aadd9c5ced74c74717f208fc64fc5dbcefcc72d37c83cda88cf9ca6";
+		String token = "256e5742682d4bd58601e0e1ecfc96a43c7f4f6ba8d73b1c504d582e6663ffb6";
 		
 		Payload payload = new Payload();
 		payload.setAlert("How are you?");
